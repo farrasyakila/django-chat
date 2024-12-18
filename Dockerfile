@@ -1,6 +1,5 @@
 # Use the official Python image from Docker Hub as the base image
 FROM python:3.10.12-alpine3.18
-#python:3.10.12
 
 # Create workding directory
 RUN mkdir -p /app
@@ -14,6 +13,7 @@ COPY . .
 # Install Dependency
 RUN pip install -r requirements.txt
 
+# Migrate database
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
