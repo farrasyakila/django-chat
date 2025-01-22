@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-wlj0u8%db2sb1^!@ityk5_0@u7og=+r*-k1-6k=wdoqc7v2vz(
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://chat.farrasyakila.xyz']
 
 
 # Application definition

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-chat-app
+  namespace: django-chat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-chat-app
+  template:
+    metadata:
+      labels:
+        app: django-chat-app
+    spec:
+# if using private registry
+#      imagePullSecrets:
+#        - name: hello
+      containers:
+      - name:  django-chat-app
+        image: farrasyakila/django-chat-app:6
+        resources:
+          limits:
+            cpu: "0.4"
+            memory: 500Mi
+          requests:
+            cpu: "0.1"
+            memory: 150Mi
+        ports:
+        - containerPort: 8000
