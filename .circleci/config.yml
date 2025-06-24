@@ -41,9 +41,9 @@ jobs:
             ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD &&
         
-            echo '🔍 Stop container on port 8000 if exists...' &&
-            docker ps -q --filter 'publish=8000' | xargs -r docker stop &&
-            docker ps -a -q --filter 'publish=8000' | xargs -r docker rm &&
+            echo '🛑 Stop and remove old container if exists...' &&
+            docker stop django-chat-app || true &&
+            docker rm django-chat-app || true &&
         
             echo '📦 Pull image...' &&
             docker pull $DOCKER_USERNAME/django-chat-app:$CIRCLE_SHA1 &&
