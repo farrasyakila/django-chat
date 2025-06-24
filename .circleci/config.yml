@@ -1,17 +1,39 @@
 version: 2.1
-
 jobs:
-  say-hello:
+  build-and-deploy:
     docker:
-      - image: cimg/base:stable
+      - image: circleci/python:3.10
     steps:
       - checkout
-      - run:
-          name: Echo a message
-          command: echo "Hello from CircleCI 👋"
+      - setup_remote_docker
 
+      - add_ssh_keys:
+          fingerprints:
+            - "YOUR_KEY_FINGERPRINT"
+      
+      - run:
+          name: Install Docker
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+      - run:
+          name: Build Docker Image
+          command: docker build -t django-chat-app .
+      - run:
+          name: Push to Docker Hub
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            docker tag django-circleci-demo $DOCKER_USERNAME/django-chat-app
+            docker push $DOCKER_USERNAME/django-chat-app
+      - run:
+          name: Deploy to EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD &&
+            docker pull $DOCKER_USERNAME/django-chat-app &&
+            docker run -d -p 8000:8000 $DOCKER_USERNAME/django-chat-app"
 workflows:
   version: 2
-  say-hello-workflow:
+  build-and-deploy:
     jobs:
-      - say-hello
+      - build-and-deploy
