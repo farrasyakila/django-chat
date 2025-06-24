@@ -1,0 +1,17 @@
+version: 2.1
+
+jobs:
+  say-hello:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Echo a message
+          command: echo "Hello from CircleCI 👋"
+
+workflows:
+  version: 2
+  say-hello-workflow:
+    jobs:
+      - say-hello
