@@ -25,7 +25,7 @@ jobs:
           name: Push to Docker Hub
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            docker tag django-circleci-demo $DOCKER_USERNAME/django-chat-app
+            docker tag django-chat-app $DOCKER_USERNAME/django-chat-app
             docker push $DOCKER_USERNAME/django-chat-app
       - run:
           name: Deploy to EC2
