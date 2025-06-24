@@ -36,14 +36,20 @@ jobs:
             - "YOUR_KEY_FINGERPRINT"
 
       - run:
-          name: Deploy to EC2 with New Image
+          name: Deploy to EC2
           command: |
             ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "
-              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD &&
-              docker pull $DOCKER_USERNAME/django-chat-app:$CIRCLE_SHA1 &&
-              docker stop django-chat-app || true &&
-              docker rm django-chat-app || true &&
-              docker run -d --name django-chat-app -p 8000:8000 $DOCKER_USERNAME/django-chat-app:$CIRCLE_SHA1
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD &&
+        
+            echo '🔍 Stop container on port 8000 if exists...' &&
+            docker ps -q --filter 'publish=8000' | xargs -r docker stop &&
+            docker ps -a -q --filter 'publish=8000' | xargs -r docker rm &&
+        
+            echo '📦 Pull image...' &&
+            docker pull $DOCKER_USERNAME/django-chat-app:$CIRCLE_SHA1 &&
+
+            echo '🚀 Run container...' &&
+            docker run -d --name django-chat-app -p 8000:8000 $DOCKER_USERNAME/django-chat-app:$CIRCLE_SHA1
             "
 
 workflows:
