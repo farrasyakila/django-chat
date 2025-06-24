@@ -1,41 +1,56 @@
 version: 2.1
+
 jobs:
-  build-and-deploy:
+  build-and-push:
     docker:
       - image: circleci/python:3.10
     steps:
       - checkout
       - setup_remote_docker
 
-      - add_ssh_keys:
-          fingerprints:
-            - "YOUR_KEY_FINGERPRINT"
-      
       - run:
           name: Install Docker
           command: |
             sudo apt-get update
             sudo apt-get install -y docker.io
+
       - run:
           name: Build Docker Image
           command: |
             cd code/
             docker build -t django-chat-app .
+
       - run:
           name: Push to Docker Hub
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
             docker tag django-chat-app $DOCKER_USERNAME/django-chat-app
             docker push $DOCKER_USERNAME/django-chat-app
+
+  deploy:
+    docker:
+      - image: circleci/python:3.10
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "YOUR_KEY_FINGERPRINT"
+
       - run:
           name: Deploy to EC2
           command: |
             ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD &&
             docker pull $DOCKER_USERNAME/django-chat-app &&
-            docker run -d -p 8000:8000 $DOCKER_USERNAME/django-chat-app"
+            docker stop django-chat-app || true &&
+            docker rm django-chat-app || true &&
+            docker run -d --name django-chat-app -p 8000:8000 $DOCKER_USERNAME/django-chat-app"
+
 workflows:
   version: 2
-  build-and-deploy:
+  build-push-deploy:
     jobs:
-      - build-and-deploy
+      - build-and-push
+      - deploy:
+          requires:
+            - build-and-push
